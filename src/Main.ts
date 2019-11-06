@@ -9,6 +9,7 @@ class Main {
 		/**
      * 画矩形方法
      */
+	private resPoint:Point;
     private DrawRect(xPos: number,yPos: number,rectColor:string): Sprite 
     {
         let sp: Sprite = new Sprite();
@@ -59,17 +60,52 @@ class Main {
 
 		}
 		let aStar:AStar=new AStar(openList,closedList,pointsArr);//new一个A*对象并把openList和closedList以及地图值传给该对象
-		let resPoint=aStar.FindPath();//调用A*寻路
+		 this.resPoint=aStar.FindPath();//调用A*寻路
+		Laya.timer.loop(1,this,this.ondraw);
 
-		while(resPoint!=null)//给路径填色
+
+		/*while(this.resPoint!=null)//给路径填色
 		{
-			this.DrawRect(resPoint.xIndex*10,resPoint.yIndex*10,"#B766AD")
-			resPoint=resPoint.parentPoint;
+			Laya.timer.loop(1000,this,this.DrawRect,[this.resPoint.xIndex*10,this.resPoint.yIndex*10,"#B766AD"],false);
+			this.resPoint=this.resPoint.parentPoint;
+		}*/
+	}
+
+
+	/*public preCTime:number=0;
+	public isSleep(delayTime: number = 0): boolean {
+			   let nowTime: number = Date.now();
+			   while (!(nowTime - this.preCTime< delayTime)){
+				this.preCTime = nowTime;
+				if(nowTime - this.preCTime< delayTime)
+				break;
+				}
+				return true;
+			}*/
+
+			/*public sleep(numberMillis:number):void{
+				let now = new Date(); 
+				let exitTime = now.getTime() + numberMillis; 
+				while (true) { 
+					now = new Date(); 
+					if (now.getTime() > exitTime) 
+					return;
+				}
+			}*/
+
+	private ondraw():void{//封装好的路径填色函数
+		if(this.resPoint!=null)//给路径填色
+		{
+			this.DrawRect(this.resPoint.xIndex*10,this.resPoint.yIndex*10,"#B766AD");
+			this.resPoint=this.resPoint.parentPoint;
+		}
+		
 		}
 	}
 
 
-}
+
+
 
 //激活启动类
 new Main();

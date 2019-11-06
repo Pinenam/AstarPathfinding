@@ -57,7 +57,7 @@ export default class CreateMap {
         
         let randomNum1:number= Math.floor(Math.random()*this.mapHeight);
 
-            pointsArr.getValue(randomNum1,0).sprite=this.DrawRect(1*this.rectWidth,randomNum1*this.rectHeight,"#FFFFFF");     
+            pointsArr.getValue(randomNum1,0).sprite=this.DrawRect(1*this.rectWidth,randomNum1*this.rectHeight,"#C4C400");     
             pointsArr.getValue(randomNum1,0).isObstacle=false;   
         for(let i=0;i<this.mapWidth;i++)
         {
@@ -73,7 +73,7 @@ export default class CreateMap {
                 {
                     randomNum0--;
                 }
-                pointsArr.getValue(randomNum0,i).sprite=this.DrawRect(i*this.rectWidth,randomNum0*this.rectHeight,"#FFFFFF");     
+                pointsArr.getValue(randomNum0,i).sprite=this.DrawRect(i*this.rectWidth,randomNum0*this.rectHeight,"#C4C400");     
                 pointsArr.getValue(randomNum0,i).isObstacle=false;   
             }
          }

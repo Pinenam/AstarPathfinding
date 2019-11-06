@@ -44,6 +44,7 @@ export default class My2DArray{
         }
         for(let i = 0 ; i < rows ; i ++){
             this.my2DArray.push(new Array<Point>());
+    
         }
     }
     
@@ -57,6 +58,7 @@ export default class My2DArray{
         for(let i = 0 ; i < this.my2DArray.length ; i ++){
             for(let j = 0 ; j < columns ; j ++){
                 this.my2DArray[i].push(value);
+    
             }
         }
     }
