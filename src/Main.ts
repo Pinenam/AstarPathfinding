@@ -1,76 +1,75 @@
+import GameConfig from "./GameConfig";
+import My2DArray from "./2DArray";
+import Point from "./Point";
+import CreateMap from "./CreateMap";
+import AStar from "./AStar";
+import Sprite = Laya.Sprite;
 
-module laya {
-    import Sprite = Laya.Sprite;
-    import Stage = Laya.Stage;
-    import WebGL = Laya.WebGL;
-
-    export class Sprite_DrawShapes {
-        private sp: Sprite;
-        public x:number;
-        public y:number;
-        public color:string;
-        public pos:[number,number,string];
-
-        constructor()
-        {
-            // 不支持WebGL时自动切换至Canvas
-            Laya.init(1000, 1000, WebGL);
-
-            Laya.stage.alignV = Stage.ALIGN_MIDDLE;
-            Laya.stage.alignH = Stage.ALIGN_CENTER;
-
-            Laya.stage.scaleMode = "showall";
-            Laya.stage.bgColor = "white";
-            this.drawMap();
-        }
-        //画地图
-        private drawMap(): void {
-            var a = new Array();
-            for(var m=0;m<100;m++){        
-                a[m] = new Array();
-                for(var n=0;n<100;n++){    
-                    a[m][n] = m+n;
-                }
-            }
-            this.sp = new Sprite();
-            Laya.stage.addChild(this.sp);
-			//画矩形
-			for(let i=0;i<100;i++){
-                //[m,n]随机取整表达式Math.floor(Math.random()*(m-n)+n);
-                let randomy0=Math.floor(Math.random()*(1-100)+100);
-                let randomy1=Math.floor(Math.random()*(1-100)+100);
-                let randomy2=Math.floor(Math.random()*(1-100)+100);
-                let randomy3=Math.floor(Math.random()*(1-100)+100);
-                for(let j=0;j<100;j++){
-                    if (randomy0==j||randomy1==j||randomy2==j||randomy3==j){
-                        this.sp.graphics.drawRect(10*i, 10*j, 10, 10, "white");
-                        this.x=10*i;
-                        this.y=10*j;
-                        this.color="white";
-                        this.pos=[this.x,this.y,this.color];
-                        a[i][j]=this.pos;
-                    }
-                    else if(i%2==0)
-                    {
-                        this.sp.graphics.drawRect(10*i, 10*j, 10, 10, "white");
-                        this.x=10*i;
-                        this.y=10*j;
-                        this.color="white";
-                        this.pos=[this.x,this.y,this.color];
-                        a[i][j]=this.pos;
-                    }
-                    else{
-                        this.sp.graphics.drawRect(10*i, 10*j, 10, 10, "black");
-                        this.x=10*i;
-                        this.y=10*j;
-                        this.color="black";
-                        this.pos=[this.x,this.y,this.color];
-                        a[i][j]=this.pos;
-                    }
-            }
-        }
-
+class Main {
+		/**
+     * 画矩形方法
+     */
+    private DrawRect(xPos: number,yPos: number,rectColor:string): Sprite 
+    {
+        let sp: Sprite = new Sprite();
+        Laya.stage.addChild(sp);
+        sp.graphics.drawRect(xPos, yPos, 10,10, rectColor);         
+        return sp;
     }
+	constructor() {
+		//--------------------------------------------------项目初始化部分-----------------------------------------------------------------------------------------------------
+		//根据IDE设置初始化引擎		
+		if (window["Laya3D"]) Laya3D.init(GameConfig.width, GameConfig.height);
+		else Laya.init(GameConfig.width, GameConfig.height, Laya["WebGL"]);
+		Laya["Physics"] && Laya["Physics"].enable();
+		Laya["DebugPanel"] && Laya["DebugPanel"].enable();
+		Laya.stage.scaleMode = GameConfig.scaleMode;
+		Laya.stage.screenMode = GameConfig.screenMode;
+		Laya.stage.alignV = GameConfig.alignV;
+		Laya.stage.alignH = GameConfig.alignH;
+		Laya.stage.bgColor="#C6E2FF";
+		//兼容微信不支持加载scene后缀场景
+		Laya.URL.exportSceneToJson = GameConfig.exportSceneToJson;
+
+		//打开调试面板（通过IDE设置调试模式，或者url地址增加debug=true参数，均可打开调试面板）
+		if (GameConfig.debug || Laya.Utils.getQueryString("debug") == "true") Laya.enableDebugPanel();
+		if (GameConfig.physicsDebug && Laya["PhysicsDebugDraw"]) Laya["PhysicsDebugDraw"].enable();
+		if (GameConfig.stat) Laya.Stat.show();
+		Laya.alertGlobalError = true;
+		//-----------------------------------------------项目初始化部分--------------------------------------------------------------------------------------------------------
+		
+
+		//创建地图
+		let pointsArr: My2DArray =new CreateMap().DrawMap();
+		
+		//路径查找
+		let openList: Point;//初始化openList的节点
+		let closedList: Point;//初始化closedList的节点
+
+		for(let i=0;i<pointsArr.rows;i++)
+		{
+			if(pointsArr.getValue(i,0).isObstacle==false)//检查每一列上的通路
+			{
+				openList=pointsArr.getValue(i,0);//把通路加到openList里面
+			}
+			if(pointsArr.getValue(i,pointsArr.columns-1).isObstacle==false)//检查每一行上的通路
+			{
+				closedList=pointsArr.getValue(i,pointsArr.columns-1);//把每一列上的通路加到closeList里面
+			}
+
+		}
+		let aStar:AStar=new AStar(openList,closedList,pointsArr);//new一个A*对象并把openList和closedList以及地图值传给该对象
+		let resPoint=aStar.FindPath();//调用A*寻路
+
+		while(resPoint!=null)//给路径填色
+		{
+			this.DrawRect(resPoint.xIndex*10,resPoint.yIndex*10,"#B766AD")
+			resPoint=resPoint.parentPoint;
+		}
+	}
+
+
 }
-}
-new laya.Sprite_DrawShapes();
+
+//激活启动类
+new Main();
